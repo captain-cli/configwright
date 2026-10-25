@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "project": "sample-stack",
+  "environment": "development",
+  "databases": {
+    "appdb": {"driver": "mysql", "host": "127.0.0.1", "port": 3306, "database": "sample_app", "user": "sample_user", "passwordRef": "env:APP_DB_PASSWORD"}
+  },
+  "services": {"api": {"application": "api", "command": "python -m sample_api"}},
+  "applications": {
+    "api": {"name": "sample-api", "port": "${dockhand.ports.api}", "database": "appdb", "jwtSecretRef": "env:JWT_SECRET"},
+    "web": {"name": "sample-web", "apiUrl": "http://localhost:${dockhand.ports.api}/"}
+  }
+}

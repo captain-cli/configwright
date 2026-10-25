@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "configwright"
+version = "0.3.0"
+description = "Standalone deployment configuration renderer for the Captain ecosystem"
+requires-python = ">=3.10"
+dependencies = ["jsonschema>=4.18,<5"]
+
+[project.scripts]
+configwright = "configwright.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
