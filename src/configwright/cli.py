@@ -8,6 +8,13 @@ from .credentials import validate_credential_references
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="configwright")
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="configwright 0.3.0",
+    )
+
     subs = parser.add_subparsers(dest="command", required=True)
     cmd = subs.add_parser("build", help="Resolve and render configuration")
     cmd.add_argument("--manifest", required=True)
