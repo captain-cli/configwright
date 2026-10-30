@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "project": "captain-integrated-demo",
+  "environment": "development",
+  "applications": {
+    "auth-api": {"name": "auth-api", "port": "${dockhand.ports.auth-api}", "jwtSecretRef": "env:JWT_SECRET"},
+    "media-api": {"name": "media-api", "port": "${dockhand.ports.media-api}", "authUrl": "http://localhost:${dockhand.ports.auth-api}/", "database": "appdb"}
+  },
+  "databases": {"appdb": {"driver": "mysql", "host": "127.0.0.1", "port": 3306, "database": "demo", "user": "demo", "passwordRef": "env:APP_DB_PASSWORD"}},
+  "services": {
+    "auth-api": {"application": "auth-api", "command": "node auth-api.js"},
+    "media-api": {"application": "media-api", "command": "node media-api.js"}
+  }
+}

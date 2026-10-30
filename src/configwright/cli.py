@@ -4,6 +4,7 @@ import json
 from .core import build, load, render
 from .contracts import validate_document
 from .credentials import validate_credential_references
+from .dockhand_adapter import normalize_servicewright
 
 
 def main(argv=None):
@@ -19,6 +20,7 @@ def main(argv=None):
     cmd = subs.add_parser("build", help="Resolve and render configuration")
     cmd.add_argument("--manifest", required=True)
     cmd.add_argument("--dockhand")
+    cmd.add_argument("--dockhand-servicewright", help="Dockhand-resolved ServiceWright JSON; normalized by service name")
     cmd.add_argument("--contracts", help="Contracts schemas directory (or its v0.1.0 parent)")
     cmd.add_argument("--credential-spec", help="CredentialWright declaration file (never secret values)")
     cmd.add_argument("--output", required=True)
@@ -26,18 +28,23 @@ def main(argv=None):
     check = subs.add_parser("validate", help="Validate manifest and optionally resolved output")
     check.add_argument("--manifest", required=True)
     check.add_argument("--dockhand")
+    check.add_argument("--dockhand-servicewright", help="Dockhand-resolved ServiceWright JSON")
     check.add_argument("--contracts", required=True)
     check.add_argument("--credential-spec", help="CredentialWright declaration file")
     args = parser.parse_args(argv)
     try:
+        if args.dockhand and args.dockhand_servicewright:
+            raise ValueError("Select either --dockhand or --dockhand-servicewright")
         manifest = load(args.manifest)
         if args.contracts:
             validate_document(manifest, args.contracts, "project.schema.json")
         # Manifests without an available Dockhand resolution can still be validated as input.
-        if args.command == "validate" and not args.dockhand and not args.credential_spec:
+        if args.command == "validate" and not args.dockhand and not args.dockhand_servicewright and not args.credential_spec:
             print(json.dumps({"valid": True, "stage": "manifest"}, indent=2))
             return 0
-        master = build(manifest, load(args.dockhand) if args.dockhand else None)
+        dockhand_data = (normalize_servicewright(load(args.dockhand_servicewright), manifest)
+                         if args.dockhand_servicewright else load(args.dockhand) if args.dockhand else None)
+        master = build(manifest, dockhand_data)
         if args.contracts:
             validate_document(master, args.contracts, "resolved-config.schema.json")
         credential_summary = None
